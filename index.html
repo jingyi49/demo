@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Speech Enhancement · Audio Demo</title>
+<style>
+:root{color-scheme:light;--ink:#182b37;--muted:#647581;--line:#dce5e9;--accent:#087c75}*{box-sizing:border-box}body{margin:0;background:#f5f7f8;color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}main{max-width:1440px;margin:auto;padding:64px 36px 40px}.eyebrow{color:var(--accent);font-size:12px;letter-spacing:.18em;font-weight:700}h1{font-size:clamp(32px,5vw,58px);letter-spacing:-.045em;margin:16px 0}header p{color:var(--muted);line-height:1.8;max-width:760px}.toolbar{display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:36px 0 28px}.filters{display:flex;gap:6px;background:#e8eef0;border-radius:12px;padding:5px}button{font:inherit;cursor:pointer;border:0;border-radius:8px;padding:10px 17px;background:transparent;color:var(--muted)}button.active{background:white;color:var(--ink);box-shadow:0 2px 6px #182b3710}button:focus-visible,a:focus-visible,audio:focus-visible{outline:3px solid #20a99f;outline-offset:3px}.options{display:flex;align-items:center;gap:16px;font-size:13px}.options label{display:flex;align-items:center;gap:7px}.options button{border:1px solid var(--line);background:white}input{accent-color:var(--accent)}.section-title{display:flex;align-items:baseline;gap:12px;margin:36px 0 16px}h2{font-size:23px;margin:0}.section-title span{font-size:13px;color:var(--muted)}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:white}table{border-collapse:collapse;width:100%;min-width:1300px;table-layout:fixed}th,td{padding:20px 15px;border-bottom:1px solid var(--line);text-align:left}th{font-size:13px;letter-spacing:.04em;background:#fafcfc}th:first-child{width:115px}tr:last-child td{border-bottom:0}th.ours,td.ours{background:#edf8f5}th.ours{color:var(--accent)}.badge{font-size:10px;border:1px solid #b8dad2;border-radius:4px;padding:3px 5px;margin-left:6px;letter-spacing:0}audio{width:100%;height:40px;display:block}.sample-id{font-size:15px;font-weight:650}.sample-label{font-size:11px;color:var(--muted);margin-top:5px}.audio-error{color:#ab3838;font-size:12px;margin-top:8px}.note{font-size:12px;color:var(--muted);line-height:1.8;margin-top:16px}footer{margin-top:44px;padding-top:20px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}[hidden]{display:none!important}@media(max-width:700px){main{padding:36px 18px}.toolbar{gap:18px}.options{flex-wrap:wrap}.filters button{padding:9px 12px}.table-wrap{border-radius:10px}th,td{padding:16px 12px}}
+</style></head>
+<body><main>
+<header><div class="eyebrow">SPEECH ENHANCEMENT / AUDIO DEMO</div><h1>Listen. Compare. Explore.</h1><p>Compare noisy input with enhanced speech from FRCRN, LLASE, UniSE, and Ours on the same listening samples.</p></header>
+<div class="toolbar"><nav class="filters" aria-label="Filter samples by acoustic condition"><button class="active" data-filter="all" aria-pressed="true">All · 9</button><button data-filter="reverb" aria-pressed="false">Reverberant · 4</button><button data-filter="noreverb" aria-pressed="false">Non-reverberant · 5</button></nav><div class="options"><label><input id="sync" type="checkbox" checked>Keep playback position within a sample</label><button id="stop">Pause all</button></div></div>
+<div id="samples"></div>
+<p class="note">Each row contains the same sample: listen to the noisy input, then compare the enhanced outputs. Starting a clip pauses all others. Playback position is shared by timestamp; outputs are not aligned for processing delay. On mobile, scroll horizontally to compare all methods.</p>
+<footer><span>Speech Enhancement · Listening Samples</span><span>9 samples / Noisy + 4 methods / WAV audio</span></footer>
+</main><script>
+const samples=[{"file": "reverb_fileid_2.wav", "id": "2", "type": "reverb"}, {"file": "reverb_fileid_85.wav", "id": "85", "type": "reverb"}, {"file": "reverb_fileid_93.wav", "id": "93", "type": "reverb"}, {"file": "reverb_fileid_137.wav", "id": "137", "type": "reverb"}, {"file": "noreverb_fileid_43.wav", "id": "43", "type": "noreverb"}, {"file": "noreverb_fileid_51.wav", "id": "51", "type": "noreverb"}, {"file": "noreverb_fileid_89.wav", "id": "89", "type": "noreverb"}, {"file": "noreverb_fileid_139.wav", "id": "139", "type": "noreverb"}, {"file": "noreverb_fileid_149.wav", "id": "149", "type": "noreverb"}];
+const models=[["noisy", "Noisy"], ["frcrn", "FRCRN"], ["llase", "LLASE"], ["unise", "UniSE"], ["our", "Ours"]];
+const container=document.querySelector('#samples');
+for(const [type,title,subtitle] of [['reverb','Reverberant','4 listening samples'],['noreverb','Non-reverberant','5 listening samples']]){
+ const section=document.createElement('section'); section.dataset.type=type;
+ section.innerHTML=`<div class="section-title"><h2>${title}</h2><span>${subtitle}</span></div><div class="table-wrap"><table><caption style="position:absolute;width:1px;height:1px;overflow:hidden">${title} audio comparison</caption><thead><tr><th scope="col">Sample</th>${models.map(([folder,label])=>`<th scope="col" class="${folder==='our'?'ours':''}">${label}${folder==='our'?'<span class="badge">OURS</span>':''}</th>`).join('')}</tr></thead><tbody>${samples.filter(s=>s.type===type).map(s=>`<tr><td><div class="sample-id">#${s.id.padStart(3,'0')}</div><div class="sample-label">FILE ID ${s.id}</div></td>${models.map(([folder,label])=>`<td class="${folder==='our'?'ours':''}"><audio controls preload="none" data-sample="${s.file}" aria-label="${title} sample ${s.id}, ${label}" src="${folder}/${s.file}"></audio></td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+ container.append(section);
+}
+let lastAudio=null;
+const audios=[...document.querySelectorAll('audio')];
+for(const audio of audios){
+ audio.addEventListener('play',()=>{
+  const previous=lastAudio;
+  const shouldSync=document.querySelector('#sync').checked && previous && previous!==audio && previous.dataset.sample===audio.dataset.sample;
+  const position=shouldSync?previous.currentTime:0;
+  audios.forEach(other=>{if(other!==audio)other.pause()});
+  lastAudio=audio;
+  if(shouldSync){
+   const seek=()=>{if(lastAudio===audio && Number.isFinite(audio.duration))audio.currentTime=Math.min(position,Math.max(0,audio.duration-0.05));};
+   if(audio.readyState>=1)seek();else audio.addEventListener('loadedmetadata',seek,{once:true});
+  }
+ });
+ audio.addEventListener('error',()=>{if(!audio.parentElement.querySelector('.audio-error')){const error=document.createElement('div');error.className='audio-error';error.textContent='Audio could not be loaded. Please check the file path.';error.setAttribute('role','status');audio.after(error);}});
+}
+document.querySelector('#stop').addEventListener('click',()=>audios.forEach(a=>a.pause()));
+document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{
+ audios.forEach(a=>a.pause());
+ document.querySelectorAll('[data-filter]').forEach(b=>{const active=b===button;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});
+ document.querySelectorAll('section[data-type]').forEach(section=>{section.hidden=button.dataset.filter!=='all'&&section.dataset.type!==button.dataset.filter});
+}));
+</script></body></html>
